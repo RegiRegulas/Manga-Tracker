@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const Register = ({ onRegister }) => {
   const [email, setEmail] = useState('');
@@ -11,22 +12,17 @@ const Register = ({ onRegister }) => {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:5000/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, username }),
+      const res = await axios.post('http://localhost:5000/auth/register', {
+        email,
+        password,
+        username,
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
-        alert('Registration successful. Please log in.');
-        onRegister(); // switch to login page
-      } else {
-        setError(data.error || 'Registration failed');
-      }
-    } catch {
-      setError('Network error');
+      alert('Registration successful. Please log in.');
+      onRegister(); // Redirect or change view
+    } catch (err) {
+      const message = err.response?.data?.error || 'Registration failed';
+      setError(message);
     }
   };
 

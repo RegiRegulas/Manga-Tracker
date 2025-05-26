@@ -1,42 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './Login';
 import Register from './Register';
+import Dashboard from './Dashboard'; // you’ll build this soon
 
 const App = () => {
   const [token, setToken] = useState(localStorage.getItem('token') || null);
-  const [showRegister, setShowRegister] = useState(false);
+  console.log('Current token:', token);
+
+
+  useEffect(() => {
+    if (token) localStorage.setItem('token', token);
+  }, [token]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     setToken(null);
   };
 
-  if (!token) {
-    return showRegister ? (
-      <div>
-        <Register onRegister={() => setShowRegister(false)} />
-        <p>
-          Already have an account?{' '}
-          <button onClick={() => setShowRegister(false)}>Login here</button>
-        </p>
-      </div>
-    ) : (
-      <div>
-        <Login onLogin={setToken} />
-        <p>
-          Don’t have an account?{' '}
-          <button onClick={() => setShowRegister(true)}>Register here</button>
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div>
-      <h1>Welcome to Manga Tracker</h1>
-      <button onClick={handleLogout}>Logout</button>
-      {/* Your protected content will go here */}
-    </div>
+    
+    <Router>
+      <Routes>
+        <Route
+  path="/"
+  element={token ?<div className="container mx-auto px-4"> <Dashboard onLogout={() => setToken(null)} /></div> : <Navigate to="/login" />}
+/>
+        <Route path="/login" element={<Login onLogin={setToken} />} />
+        <Route path="/register" element={<Register onRegister={() => window.location.href = '/login'} />} />
+        <Route path="*" element={<Navigate to={token ? "/" : "/login"} />} />
+      </Routes>
+    </Router>
+  
   );
 };
 

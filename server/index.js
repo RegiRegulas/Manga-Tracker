@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import pool from './db.js';
 import authRoutes from './routes/auth.js';
 import authenticateToken from './middleware/authMiddleware.js';
-
+import mangaRoutes from './routes/manga.js';
 
 
 
@@ -32,6 +32,8 @@ pool.query('SELECT NOW()', (err, res) => {
   });
 
 app.use('/auth', authRoutes);
+app.use('/api/manga', mangaRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
