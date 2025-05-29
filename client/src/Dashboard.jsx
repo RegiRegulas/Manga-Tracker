@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Library from './components/Library';
 import AddMangaForm from './components/AddMangaForm';
+import { Navigate } from 'react-router-dom';
 
 const Dashboard = ({ onLogout }) => {
   // activeTab controls which component is shown ('library' or 'add')
@@ -15,6 +16,9 @@ const Dashboard = ({ onLogout }) => {
     setRefreshFlag(flag => !flag);
     setActiveTab('library');
   };
+
+  // Redirect to login if not logged in
+  if (!localStorage.getItem('token')) return <Navigate to="/login" />;
 
   // Render main content based on activeTab
   const renderContent = () => {
@@ -29,12 +33,12 @@ const Dashboard = ({ onLogout }) => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-[#1a1a1a] text-white">
       {/* Sidebar for navigation */}
-      <Sidebar onTabChange={setActiveTab} onLogout={onLogout} />
+      <Sidebar onTabChange={setActiveTab} onLogout={onLogout} className="bg-[#2a2a2a]" />
 
       {/* Main content area */}
-      <main className="flex-1 overflow-y-auto p-6">
+      <main className="flex-1 overflow-y-auto p-6 bg-[#1a1a1a]">
         {renderContent()}
       </main>
     </div>

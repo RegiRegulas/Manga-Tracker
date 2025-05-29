@@ -1,3 +1,4 @@
+// client/src/components/AddMangaForm.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -7,7 +8,7 @@ const AddMangaForm = ({ onAdded }) => {
   const [chaptersRead, setChaptersRead] = useState(0);
   const [error, setError] = useState('');
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -18,18 +19,21 @@ const AddMangaForm = ({ onAdded }) => {
         { title, status, chaptersRead },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // clear form
+
       setTitle('');
       setStatus('Plan to Read');
       setChaptersRead(0);
-      if (onAdded) onAdded(res.data);  // notify parent to refetch or prepend
+      if (onAdded) onAdded(res.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to add manga');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md bg-white p-6 rounded-lg shadow-md">
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-md bg-[#1a1a1a] p-6 rounded-lg shadow-md text-white border border-gray-700"
+    >
       <h2 className="text-xl font-semibold mb-4">Add New Manga</h2>
       {error && <p className="text-red-500 mb-2">{error}</p>}
 
@@ -37,9 +41,9 @@ const AddMangaForm = ({ onAdded }) => {
         <label className="block mb-1">Title</label>
         <input
           type="text"
-          className="w-full border rounded px-3 py-2"
+          className="w-full bg-[#2a2a2a] border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
           value={title}
-          onChange={e => setTitle(e.target.value)}
+          onChange={(e) => setTitle(e.target.value)}
           required
         />
       </div>
@@ -47,9 +51,9 @@ const AddMangaForm = ({ onAdded }) => {
       <div className="mb-4">
         <label className="block mb-1">Status</label>
         <select
-          className="w-full border rounded px-3 py-2"
+          className="w-full bg-[#2a2a2a] border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
           value={status}
-          onChange={e => setStatus(e.target.value)}
+          onChange={(e) => setStatus(e.target.value)}
         >
           <option>Plan to Read</option>
           <option>Reading</option>
@@ -61,16 +65,16 @@ const AddMangaForm = ({ onAdded }) => {
         <label className="block mb-1">Chapters Read</label>
         <input
           type="number"
-          className="w-full border rounded px-3 py-2"
-          value={chaptersRead}
           min="0"
-          onChange={e => setChaptersRead(Number(e.target.value))}
+          className="w-full bg-[#2a2a2a] border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          value={chaptersRead}
+          onChange={(e) => setChaptersRead(Number(e.target.value))}
         />
       </div>
 
       <button
         type="submit"
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded"
       >
         Add Manga
       </button>

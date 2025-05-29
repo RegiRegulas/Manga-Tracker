@@ -1,4 +1,3 @@
-// src/Login.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,73 +17,71 @@ const Login = ({ onLogin }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
+
       const data = await res.json();
 
       if (res.ok) {
-        // Successful login:
         localStorage.setItem('token', data.token);
         onLogin(data.token);
         navigate('/');
       } else {
-        // Backend returned an error:
         setError(data.error || 'Login failed');
       }
-    } catch {
+    } catch (err) {
       setError('Network error');
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm bg-white p-6 rounded-lg shadow-lg"
-      >
-        <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
-        {error && <p className="text-red-500 mb-3">{error}</p>}
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-100">Login</h2>
 
-        <div className="mb-4">
-          <label className="block mb-1 text-gray-700">Email</label>
-          <input
-            type="email"
-            className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 focus:outline-none focus:border-blue-500"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
-            autoComplete="username"
-          />
-        </div>
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-        <div className="mb-4">
-          <label className="block mb-1 text-gray-700">Password</label>
-          <input
-            type="password"
-            className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-50 focus:outline-none focus:border-blue-500"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              autoComplete="username"
+              className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded"
-        >
-          Login
-        </button>
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
 
-        <p className="mt-4 text-center text-gray-600">
-          Don't have an account?{' '}
           <button
-            type="button"
+            type="submit"
+            className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition"
+          >
+            Login
+          </button>
+        </form>
+
+        <p className="text-sm text-center mt-4 text-gray-600 dark:text-gray-400">
+          Don’t have an account?{' '}
+          <button
+            className="text-indigo-600 hover:underline dark:text-indigo-400"
             onClick={() => navigate('/register')}
-            className="text-blue-600 hover:underline"
           >
             Register here
           </button>
         </p>
-      </form>
+      </div>
     </div>
   );
 };

@@ -27,22 +27,22 @@ const Library = ({ refreshFlag }) => {
     fetchManga();
   }, [refreshFlag]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p className="text-white">Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div className="p-4 flex flex-wrap gap-4">
+    <div className="p-4 flex flex-wrap gap-4 bg-[#1a1a1a] min-h-[400px] rounded-lg">
       {mangaList.length === 0 ? (
-        <p>No manga tracked yet.</p>
+        <p className="text-gray-300">No manga tracked yet.</p>
       ) : (
         mangaList.map((manga) => (
           <div
             key={manga.id}
-            className="w-full sm:w-64 bg-white rounded-xl shadow-md p-4"
+            className="w-full sm:w-64 bg-[#2a2a2a] rounded-xl shadow-md p-4 text-white border border-gray-700"
           >
             <h3 className="text-lg font-semibold">{manga.title}</h3>
-            <p className="text-sm text-gray-600">Status: {manga.status}</p>
-            <p className="text-sm text-gray-600">Chapters Read: {manga.chaptersRead}</p>
+            <p className="text-sm text-gray-400">Status: {manga.status}</p>
+            <p className="text-sm text-gray-400">Chapters Read: {manga.chaptersRead}</p>
           </div>
         ))
       )}
