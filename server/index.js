@@ -5,6 +5,7 @@ import pool from './db.js';
 import authRoutes from './routes/auth.js';
 import authenticateToken from './middleware/authMiddleware.js';
 import mangaRoutes from './routes/manga.js';
+import exploreRoutes from './routes/explore.js';
 
 
 
@@ -13,6 +14,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/api/explore', exploreRoutes);
 
 app.get('/protected', authenticateToken, (req, res) => {
   res.json({ message: `Hello ${req.user.username}, you have access!` });
