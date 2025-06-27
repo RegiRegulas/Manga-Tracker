@@ -19,7 +19,6 @@ const Library = ({ refreshFlag }) => {
   });
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [searchLoading, setSearchLoading] = useState(false);
   const [recommendations, setRecommendations] = useState([]);
 
   const fetchManga = async () => {
