@@ -27,7 +27,7 @@ const Library = ({ refreshFlag }) => {
     setError("");
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/manga", {
+      const res = await axios.get("https://manga-tracker-backend.onrender.com/api/manga", {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log(res.data);
@@ -71,7 +71,7 @@ const Library = ({ refreshFlag }) => {
         try {
           setIsSearching(true);
           const res = await axios.get(
-            `http://localhost:5000/api/manga/search?title=${encodeURIComponent(
+            `https://manga-tracker-backend.onrender.com/api/manga/search?title=${encodeURIComponent(
               searchTerm
             )}`
           );
@@ -93,7 +93,7 @@ const Library = ({ refreshFlag }) => {
   const fetchRecommendations = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:5000/api/manga/recommendations", {
+      const res = await axios.get("https://manga-tracker-backend.onrender.com/api/manga/recommendations", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setRecommendations(res.data);
@@ -120,7 +120,7 @@ const Library = ({ refreshFlag }) => {
     if (!window.confirm("Are you sure you want to delete this manga?")) return;
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/manga/${id}`, {
+      await axios.delete(`https://manga-tracker-backend.onrender.com/api/manga/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchManga();
@@ -134,7 +134,7 @@ const Library = ({ refreshFlag }) => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/api/manga/${editingManga.id}`,
+        `https://manga-tracker-backend.onrender.com/api/manga/${editingManga.id}`,
         {
           title: formData.title,
           status: formData.status,
@@ -164,7 +164,7 @@ const Library = ({ refreshFlag }) => {
 
       console.log("📦 Payload being sent:", payload); // ✅
 
-      await axios.post("http://localhost:5000/api/manga", payload, {
+      await axios.post("https://manga-tracker-backend.onrender.com/api/manga", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
