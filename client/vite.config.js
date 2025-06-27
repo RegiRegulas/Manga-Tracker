@@ -6,6 +6,7 @@ export default defineConfig({
   base: './',
   preview: {
     port: 10000,
-    host: '0.0.0.0', // <- required for Render to detect open port
+    host: '0.0.0.0',
+    allowedHosts: ['manga-tracker-frontend.onrender.com'], // ✅ Add this line
   },
 })
