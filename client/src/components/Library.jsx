@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import SearchBar from "../components/SearchBar";
+import MangaCard from "../components/MangaCard";
+import EditForm from "../components/EditForm";
 
 const Library = ({ refreshFlag }) => {
   const [mangaList, setMangaList] = useState([]);
@@ -14,6 +17,10 @@ const Library = ({ refreshFlag }) => {
     status: "",
     chaptersRead: "",
   });
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [recommendations, setRecommendations] = useState([]);
 
   const fetchManga = async () => {
     setLoading(true);
@@ -23,6 +30,7 @@ const Library = ({ refreshFlag }) => {
       const res = await axios.get("http://localhost:5000/api/manga", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log(res.data);
       setMangaList(res.data);
     } catch (err) {
       setError(err.response?.data?.error || "Failed to load manga");
@@ -50,6 +58,53 @@ const Library = ({ refreshFlag }) => {
 
     setFilteredList(filtered);
   }, [searchTerm, statusFilter, mangaList]);
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      const fetchSearchResults = async () => {
+        if (!searchTerm.trim()) {
+          setSearchResults([]); // ✅ only clear if blank
+          setIsSearching(false);
+          return;
+        }
+
+        try {
+          setIsSearching(true);
+          const res = await axios.get(
+            `http://localhost:5000/api/manga/search?title=${encodeURIComponent(
+              searchTerm
+            )}`
+          );
+          setSearchResults(res.data);
+          setIsSearching(false);
+        } catch (err) {
+          console.error("Error fetching from MangaDex:", err);
+          setIsSearching(false);
+        }
+      };
+
+      fetchSearchResults();
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchTerm]);
+
+  useEffect(() => {
+  const fetchRecommendations = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await axios.get("http://localhost:5000/api/manga/recommendations", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setRecommendations(res.data);
+    } catch (err) {
+      console.error("Failed to fetch recommendations:", err);
+    }
+  };
+
+  fetchRecommendations();
+}, []);
+
 
   const handleEditClick = (manga) => {
     setEditingManga(manga);
@@ -96,6 +151,34 @@ const Library = ({ refreshFlag }) => {
     }
   };
 
+  const handleAddToLibrary = async (manga) => {
+    try {
+      const token = localStorage.getItem("token");
+      const payload = {
+        title: manga.title,
+        status: "Plan to Read",
+        chaptersRead: 0,
+        coverUrl: manga.coverUrl,
+        genres: Array.isArray(manga.genres) ? manga.genres : [],
+      };
+
+      console.log("📦 Payload being sent:", payload); // ✅
+
+      await axios.post("http://localhost:5000/api/manga", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      fetchManga();
+      setTimeout(() => setSearchTerm(""), 500);
+    } catch (err) {
+      console.error(
+        "❌ Failed to add manga:",
+        err.response?.data || err.message
+      );
+      setError("Failed to add manga to library");
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -107,125 +190,103 @@ const Library = ({ refreshFlag }) => {
   return (
     <div>
       <h1 className="text-2xl font-semibold text-white mb-4">My Library</h1>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
-        <input
-          type="text"
-          placeholder="Search manga by title..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="px-4 py-2 border rounded-md w-full sm:w-1/2 bg-gray-800 text-white placeholder-gray-400"
-        />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border rounded-md bg-gray-800 text-white"
-        >
-          <option className="text-black">All</option>
-          <option className="text-black">Plan to Read</option>
-          <option className="text-black">Reading</option>
-          <option className="text-black">Completed</option>
-        </select>
-      </div>
 
+      <SearchBar
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+      />
+
+      {/* MangaDex Search Results */}
+      {searchResults.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-white mb-2">
+            MangaDex Results
+          </h2>
+          <div className="flex flex-wrap gap-4">
+            {searchResults.map((manga) => (
+              <div
+                key={manga.id}
+                className="bg-gray-800 rounded-xl p-4 w-full sm:w-64 shadow-md text-white"
+              >
+                <img
+                  src={manga.coverUrl}
+                  alt={`${manga.title} cover`}
+                  className="w-full h-60 object-cover rounded mb-3"
+                />
+                <h3 className="text-lg font-semibold">{manga.title}</h3>
+                <p className="text-sm text-gray-300 mb-1">
+                  Genres: {manga.genres?.join(", ") || "N/A"}
+                </p>
+                <p className="text-sm text-gray-400 mb-3">
+                  {manga.description?.slice(0, 100) || "No description"}...
+                </p>
+                <button
+                  onClick={() => handleAddToLibrary(manga)}
+                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded"
+                >
+                  Add to My Library
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* User's Own Manga Library */}
       <div className="p-4 flex flex-wrap gap-4">
-        {filteredList.length === 0 ? (
+        {filteredList.length === 0 && !isSearching && !searchResults.length ? (
           <p className="text-white">No manga matched your search.</p>
         ) : (
           filteredList.map((manga) => (
-            <div
+            <MangaCard
               key={manga.id}
-              className="w-full sm:w-64 bg-gray-800 rounded-xl shadow-md p-4 text-white"
-            >
-              <h3 className="text-lg font-semibold">{manga.title}</h3>
-              <p className="text-sm text-gray-300">Status: {manga.status}</p>
-              <p className="text-sm text-gray-300">
-                Chapters Read: {manga.chaptersRead}
-              </p>
-
-              <div className="mt-3 flex gap-2">
-                <button
-                  className="bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded"
-                  onClick={() => handleEditClick(manga)}
-                >
-                  Edit
-                </button>
-                <button
-                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded"
-                  onClick={() => handleDeleteClick(manga.id)}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+              manga={manga}
+              onEdit={handleEditClick}
+              onDelete={handleDeleteClick}
+            />
           ))
         )}
       </div>
+      {recommendations.length > 0 && (
+        <div>
+          <h2 className="text-xl text-white font-semibold mt-6 mb-2">
+            Recommended for You
+          </h2>
+          <div className="flex flex-wrap gap-4">
+            {recommendations.map((manga) => (
+              <div
+                key={manga.id}
+                className="bg-gray-700 rounded p-3 text-white w-60"
+              >
+                <img
+                  src={manga.cover_url}
+                  alt={`${manga.title} cover`}
+                  className="w-full h-56 object-cover rounded mb-2"
+                />
+                <h3 className="text-lg font-bold">{manga.title}</h3>
+                <p className="text-sm text-gray-300">
+                  {manga.genres?.join(", ") || "N/A"}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
+      {/* Edit Form */}
       {editingManga && (
-        <form
+        <EditForm
+          formData={formData}
+          onChange={handleInputChange}
           onSubmit={handleEditSubmit}
-          className="max-w-md bg-gray-900 p-6 rounded-lg shadow-md mt-6 text-white"
-        >
-          <h2 className="text-xl font-semibold mb-4">Edit Manga</h2>
-          {error && <p className="text-red-500 mb-2">{error}</p>}
-
-          <div className="mb-4">
-            <label className="block mb-1 text-gray-300">Title</label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              className="w-full border border-gray-700 rounded px-3 py-2 bg-gray-800 text-white"
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block mb-1 text-gray-300">Status</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-              className="w-full border border-gray-700 rounded px-3 py-2 bg-gray-800 text-white"
-            >
-              <option>Plan to Read</option>
-              <option>Reading</option>
-              <option>Completed</option>
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label className="block mb-1 text-gray-300">Chapters Read</label>
-            <input
-              type="number"
-              name="chaptersRead"
-              min="0"
-              value={formData.chaptersRead}
-              onChange={handleInputChange}
-              className="w-full border border-gray-700 rounded px-3 py-2 bg-gray-800 text-white"
-            />
-          </div>
-
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded"
-              onClick={() => {
-                setEditingManga(null);
-                setError("");
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+          onCancel={() => {
+            setEditingManga(null);
+            setError("");
+          }}
+          error={error}
+        />
       )}
     </div>
   );
