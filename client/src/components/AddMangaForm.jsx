@@ -15,7 +15,7 @@ const AddMangaForm = ({ onAdded }) => {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.post(
-        'http://localhost:5000/api/manga',
+        'https://manga-tracker-backend.onrender.com/api/manga',
         { title, status, chaptersRead },
         { headers: { Authorization: `Bearer ${token}` } }
       );
